@@ -245,11 +245,56 @@ typedef_t struct {
 #define LEGACY_BITOFFSET                     0
 #define LEGACY_LEN                           1
 
+#define LED1_BYTEOFFSET                    0
+#define LED1_BITOFFSET                     1
+#define LED1_LEN                           1
+
+#define LED2_BYTEOFFSET                    0
+#define LED2_BITOFFSET                     2
+#define LED2_LEN                           1
+
+#define LED3_BYTEOFFSET                    0
+#define LED3_BITOFFSET                     3
+#define LED3_LEN                           1
+
+#define LED4_BYTEOFFSET                    0
+#define LED4_BITOFFSET                     4
+#define LED4_LEN                           1
+
+#define INFRARED_BYTEOFFSET                    5
+#define INFRARED_BITOFFSET                     0
+#define INFRARED_LEN                           1
+
 
 #define MOTER_RATIO                         1
 #define MOTER_ADDITION                      1
 #define MOTER_MIN                           0
 #define MOTER_MAX                           9
+
+#define LED_G_RATIO                         1
+#define LED_G_ADDITION                      0
+#define LED_G_MIN                           1
+#define LED_G_MAX                           254
+
+#define LED_R_RATIO                         1
+#define LED_R_ADDITION                      0
+#define LED_R_MIN                           1
+#define LED_R_MAX                           254
+
+#define LED_B_RATIO                         1
+#define LED_B_ADDITION                      0
+#define LED_B_MIN                           1
+#define LED_B_MAX                           254
+
+#define TEMPERATURE_RATIO                         1
+#define TEMPERATURE_ADDITION                      -30
+#define TEMPERATURE_MIN                           0
+#define TEMPERATURE_MAX                           217
+
+#define HUMIDITY_RATIO                         1
+#define HUMIDITY_ADDITION                      0
+#define HUMIDITY_MIN                           0
+#define HUMIDITY_MAX                           100
 
 /**@} */
 
@@ -258,6 +303,8 @@ typedef_t struct {
 #define COUNT_W_BIT 1
 
 
+/** 只读型数据点 布尔和枚举变量 所占字节大小*/
+#define COUNT_R_BIT 1
 
 
 
@@ -284,7 +331,14 @@ typedef enum
   WIFI_NTP,                                         ///< 网络时间事件
   TRANSPARENT_DATA,                                 ///< 透传事件
   EVENT_LEGACY,
+  EVENT_LED1,
+  EVENT_LED2,
+  EVENT_LED3,
+  EVENT_LED4,
   EVENT_MOTER,
+  EVENT_LED_G,
+  EVENT_LED_R,
+  EVENT_LED_B,
   EVENT_TYPE_MAX                                    ///< 枚举成员数量计算 (用户误删)
 } EVENT_TYPE_T;
 
@@ -292,19 +346,39 @@ typedef enum
 /** 用户区设备状态结构体*/
 typedef_t struct {
   bool valuelegacy;
+  bool valueLED1;
+  bool valueLED2;
+  bool valueLED3;
+  bool valueLED4;
   uint32_t valueMoter;
+  uint32_t valueLED_G;
+  uint32_t valueLED_R;
+  uint32_t valueLED_B;
+  bool valueInfrared;
+  int32_t valueTemperature;
+  uint32_t valueHumidity;
 } dataPoint_t;
 
 /** 对应协议“4.10 WiFi模组控制设备”中的标志位"attr_flags" */ 
 typedef_t struct {
   uint8_t flaglegacy:1;
+  uint8_t flagLED1:1;
+  uint8_t flagLED2:1;
+  uint8_t flagLED3:1;
+  uint8_t flagLED4:1;
   uint8_t flagMoter:1;
+  uint8_t flagLED_G:1;
+  uint8_t flagLED_R:1;
+  uint8_t flagLED_B:1;
 } attrFlags_t;
 
 /** 对应协议“4.10 WiFi模组控制设备”中的数据值"attr_vals" */
 typedef_t struct {
   uint8_t wBitBuf[COUNT_W_BIT];
   uint8_t valueMoter;
+  uint8_t valueLED_G;
+  uint8_t valueLED_R;
+  uint8_t valueLED_B;
 } attrVals_t;
 
 /** 对应协议“4.10 WiFi模组控制设备”中“P0协议区”的标志位"attr_flags(1B)" + 数据值"attr_vals(6B)" */ 
@@ -318,8 +392,14 @@ typedef_t struct {
   uint8_t wBitBuf[COUNT_W_BIT];
 
   uint8_t valueMoter;
+  uint8_t valueLED_G;
+  uint8_t valueLED_R;
+  uint8_t valueLED_B;
 
+  uint8_t rBitBuf[COUNT_R_BIT];
 
+  uint8_t valueTemperature;
+  uint8_t valueHumidity;
 
 
 } devStatus_t; 

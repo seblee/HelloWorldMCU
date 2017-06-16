@@ -119,12 +119,17 @@
 #endif
 /**@} */
 
+uint32_t gizGetTimerCount(void);
 /**@name 设备状态数据上报间隔时间宏定义
 * @{
 */
 #define REPORT_TIME_MAX 6000 //6S
 /**@} */
-
+/**@name 采集间隔时间宏定义
+* @{
+*/
+#define SAMPLING_TIME_MAX 2000 //2S
+/**@} */
 void timerInit(void);
 void uartInit(void);
 void mcuRestart(void);

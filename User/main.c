@@ -15,9 +15,14 @@
 ***********************************************************/
 
 #include <string.h>
+#include "delay.h"
 #include "Hal_key/hal_key.h"
 #include "Hal_Usart/hal_uart.h"
 #include "Hal_Watchdog/hal_watchdog.h"
+#include "Hal_infrared/Hal_infrared.h"
+#include "Hal_rgb_led/Hal_rgb_led.h"
+#include "Hal_temp_hum/Hal_temp_hum.h"
+#include "Hal_led/Hal_led.h"
 #include "gizwits_protocol.h"
 
 /** 用户区当前设备状态结构体*/
@@ -41,8 +46,20 @@ keysTypedef_t keys;                                     ///< 定义总的按键�
 */
 void userInit(void)
 {
+    delayInit(72);
     uartxInit();        //printf打印串口初始化
-    watchdogInit(2);    //看门狗复位时间2s
+	irInit();
+    ledGpioInit();
+    rgbLedInit();
+    rgbKeyGpioInit();  
+    
+    printf("00 \n");    
+    dht11Init();
+
+    printf("11 \n");    
+	watchdogInit(2);    //看门狗复位时间2s
+
+    printf("22 \n");    
     memset((uint8_t*)&currentDataPoint, 0, sizeof(dataPoint_t));
 }
 
@@ -56,9 +73,26 @@ void userInit(void)
 
 void userHandle(void)
 {
-	    /*
-
+	
+    uint8_t ret  = 0;
+    static uint32_t thLastTimer = 0;
+        
+    currentDataPoint.valueInfrared = irHandle();//Add Sensor Data Collection
+    /*
+    currentDataPoint.valueTemperature = ;//Add Sensor Data Collection
+    currentDataPoint.valueHumidity = ;//Add Sensor Data Collection
     */
+    if((gizGetTimerCount()-thLastTimer) > SAMPLING_TIME_MAX) 
+    {
+        ret = dht11Read((uint8_t *)&currentDataPoint.valueTemperature, (uint8_t *)&currentDataPoint.valueHumidity);//Add Sensor Data Collection
+        if(ret != 0)
+        {
+            printf("Failed to read DHT11\r\n"); 
+        }
+				
+        thLastTimer = gizGetTimerCount();
+
+    }
 }
 
 /**
@@ -136,7 +170,6 @@ int main(void)
 
     timerInit();
     uartInit();
-
     gizwitsInit();
     
     printf("MCU Init Success \n");
@@ -149,3 +182,4 @@ int main(void)
         gizwitsHandle((dataPoint_t *)&currentDataPoint);
     }
 }
+

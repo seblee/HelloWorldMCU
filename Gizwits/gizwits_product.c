@@ -17,8 +17,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "Hal_Usart/hal_uart.h"
+#include "Hal_temp_hum/Hal_temp_hum.h"
 #include "gizwits_protocol.h"
-
+#include "Hal_led/Hal_led.h"
+#include "Hal_rgb_led/Hal_rgb_led.h"
 /**@} */
 /**@name Gizwits 用户API接口
 * @{
@@ -67,11 +69,83 @@ int8_t gizwitsEventProcess(eventInfo_t *info, uint8_t *data, uint32_t len)
           //user handle    
         }
         break;
-
-
+      case EVENT_LED1:
+        currentDataPoint.valueLED1 = dataPointPtr->valueLED1;
+        GIZWITS_LOG("Evt: EVENT_LED1 %d \n", currentDataPoint.valueLED1);
+        if(0x01 == currentDataPoint.valueLED1)
+        {
+            ledOn(LED1);
+          //user handle
+        }
+        else
+        {
+            ledOff(LED1);
+          //user handle    
+        }
+        break;
+      case EVENT_LED2:
+        currentDataPoint.valueLED2 = dataPointPtr->valueLED2;
+        GIZWITS_LOG("Evt: EVENT_LED2 %d \n", currentDataPoint.valueLED2);
+        if(0x01 == currentDataPoint.valueLED2)
+        {
+            ledOn(LED2);
+          //user handle
+        }
+        else
+        {
+            ledOff(LED2);
+          //user handle
+        }
+        break;
+      case EVENT_LED3:
+        currentDataPoint.valueLED3 = dataPointPtr->valueLED3;
+        GIZWITS_LOG("Evt: EVENT_LED3 %d \n", currentDataPoint.valueLED3);
+        if(0x01 == currentDataPoint.valueLED3)
+        {
+            ledOn(LED3);
+          //user handle
+        }
+        else
+        {
+            ledOff(LED3);
+          //user handle    
+        }
+        break;
+      case EVENT_LED4:
+        currentDataPoint.valueLED4 = dataPointPtr->valueLED4;
+        GIZWITS_LOG("Evt: EVENT_LED4 %d \n", currentDataPoint.valueLED4);
+        if(0x01 == currentDataPoint.valueLED4)
+        {
+            ledOn(LED4);
+          //user handle
+        }
+        else
+        {
+            ledOff(LED4);
+          //user handle    
+        }
+        break;
       case EVENT_MOTER:
         currentDataPoint.valueMoter = dataPointPtr->valueMoter;
         GIZWITS_LOG("Evt:EVENT_MOTER %d\n",currentDataPoint.valueMoter);
+        //user handle
+        break;
+      case EVENT_LED_G:
+        currentDataPoint.valueLED_G = dataPointPtr->valueLED_G;
+        GIZWITS_LOG("Evt:EVENT_LED_G %d\n",currentDataPoint.valueLED_G);      
+        ledRgbControl(currentDataPoint.valueLED_R,currentDataPoint.valueLED_G,currentDataPoint.valueLED_B);
+        //user handle
+        break;
+      case EVENT_LED_R:
+        currentDataPoint.valueLED_R = dataPointPtr->valueLED_R;
+        GIZWITS_LOG("Evt:EVENT_LED_R %d\n",currentDataPoint.valueLED_R);
+        ledRgbControl(currentDataPoint.valueLED_R,currentDataPoint.valueLED_G,currentDataPoint.valueLED_B);
+        //user handle
+        break;
+      case EVENT_LED_B:
+        currentDataPoint.valueLED_B = dataPointPtr->valueLED_B;
+        GIZWITS_LOG("Evt:EVENT_LED_B %d\n",currentDataPoint.valueLED_B);
+        ledRgbControl(currentDataPoint.valueLED_R,currentDataPoint.valueLED_G,currentDataPoint.valueLED_B);
         //user handle
         break;
 
@@ -83,6 +157,7 @@ int8_t gizwitsEventProcess(eventInfo_t *info, uint8_t *data, uint32_t len)
       case WIFI_STATION:
         break;
       case WIFI_CON_ROUTER:
+	      ledRgbControl(0, 0, 0); 
         break;
       case WIFI_DISCON_ROUTER:
         break;

@@ -592,11 +592,74 @@ static int8_t ICACHE_FLASH_ATTR gizDataPoint2Event(gizwitsIssued_t *issuedData, 
 
 
 
+    if(0x01 == issuedData->attrFlags.flagLED1)
+    {
+        info->event[info->num] = EVENT_LED1;
+        info->num++;
+        dataPoints->valueLED1 = gizDecompressionValue(LED1_BYTEOFFSET,LED1_BITOFFSET,LED1_LEN,(uint8_t *)&issuedData->attrVals.wBitBuf,sizeof(issuedData->attrVals.wBitBuf));
+    }
+
+
+
+    if(0x01 == issuedData->attrFlags.flagLED2)
+    {
+        info->event[info->num] = EVENT_LED2;
+        info->num++;
+        dataPoints->valueLED2 = gizDecompressionValue(LED2_BYTEOFFSET,LED2_BITOFFSET,LED2_LEN,(uint8_t *)&issuedData->attrVals.wBitBuf,sizeof(issuedData->attrVals.wBitBuf));
+    }
+
+
+
+    if(0x01 == issuedData->attrFlags.flagLED3)
+    {
+        info->event[info->num] = EVENT_LED3;
+        info->num++;
+        dataPoints->valueLED3 = gizDecompressionValue(LED3_BYTEOFFSET,LED3_BITOFFSET,LED3_LEN,(uint8_t *)&issuedData->attrVals.wBitBuf,sizeof(issuedData->attrVals.wBitBuf));
+    }
+
+
+
+    if(0x01 == issuedData->attrFlags.flagLED4)
+    {
+        info->event[info->num] = EVENT_LED4;
+        info->num++;
+        dataPoints->valueLED4 = gizDecompressionValue(LED4_BYTEOFFSET,LED4_BITOFFSET,LED4_LEN,(uint8_t *)&issuedData->attrVals.wBitBuf,sizeof(issuedData->attrVals.wBitBuf));
+    }
+
+
+
     if(0x01 == issuedData->attrFlags.flagMoter)
     {
         info->event[info->num] = EVENT_MOTER;
         info->num++;
         dataPoints->valueMoter = gizX2Y(MOTER_RATIO,  MOTER_ADDITION, issuedData->attrVals.valueMoter); 
+    }
+
+
+
+    if(0x01 == issuedData->attrFlags.flagLED_G)
+    {
+        info->event[info->num] = EVENT_LED_G;
+        info->num++;
+        dataPoints->valueLED_G = gizX2Y(LED_G_RATIO,  LED_G_ADDITION, issuedData->attrVals.valueLED_G); 
+    }
+
+
+
+    if(0x01 == issuedData->attrFlags.flagLED_R)
+    {
+        info->event[info->num] = EVENT_LED_R;
+        info->num++;
+        dataPoints->valueLED_R = gizX2Y(LED_R_RATIO,  LED_R_ADDITION, issuedData->attrVals.valueLED_R); 
+    }
+
+
+
+    if(0x01 == issuedData->attrFlags.flagLED_B)
+    {
+        info->event[info->num] = EVENT_LED_B;
+        info->num++;
+        dataPoints->valueLED_B = gizX2Y(LED_B_RATIO,  LED_B_ADDITION, issuedData->attrVals.valueLED_B); 
     }
 
 
@@ -627,12 +690,70 @@ static int8_t ICACHE_FLASH_ATTR gizCheckReport(dataPoint_t *cur, dataPoint_t *la
         GIZWITS_LOG("valuelegacy Changed\n");
         ret = 1;
     }
+    if(last->valueLED1 != cur->valueLED1)
+    {
+        GIZWITS_LOG("valueLED1 Changed\n");
+        ret = 1;
+    }
+    if(last->valueLED2 != cur->valueLED2)
+    {
+        GIZWITS_LOG("valueLED2 Changed\n");
+        ret = 1;
+    }
+    if(last->valueLED3 != cur->valueLED3)
+    {
+        GIZWITS_LOG("valueLED3 Changed\n");
+        ret = 1;
+    }
+    if(last->valueLED4 != cur->valueLED4)
+    {
+        GIZWITS_LOG("valueLED4 Changed\n");
+        ret = 1;
+    }
     if(last->valueMoter != cur->valueMoter)
     {
         GIZWITS_LOG("valueMoter Changed\n");
         ret = 1;
     }
+    if(last->valueLED_G != cur->valueLED_G)
+    {
+        GIZWITS_LOG("valueLED_G Changed\n");
+        ret = 1;
+    }
+    if(last->valueLED_R != cur->valueLED_R)
+    {
+        GIZWITS_LOG("valueLED_R Changed\n");
+        ret = 1;
+    }
+    if(last->valueLED_B != cur->valueLED_B)
+    {
+        GIZWITS_LOG("valueLED_B Changed\n");
+        ret = 1;
+    }
+    if(last->valueInfrared != cur->valueInfrared)
+    {
+        GIZWITS_LOG("valueInfrared Changed\n");
+        ret = 1;
+    }
 
+    if(last->valueTemperature != cur->valueTemperature)
+    {
+        if(gizGetTimerCount()-lastReportTime >= REPORT_TIME_MAX)
+        {
+            GIZWITS_LOG("valueTemperature Changed\n");
+            lastReportTime = gizGetTimerCount();
+            ret = 1;
+        }
+    }
+    if(last->valueHumidity != cur->valueHumidity)
+    {
+        if(gizGetTimerCount()-lastReportTime >= REPORT_TIME_MAX)
+        {
+            GIZWITS_LOG("valueHumidity Changed\n");
+            lastReportTime = gizGetTimerCount();
+            ret = 1;
+        }
+    }
 
     return ret;
 }
@@ -654,11 +775,23 @@ static int8_t ICACHE_FLASH_ATTR gizDataPoints2ReportData(dataPoint_t *dataPoints
     }
 
     memset((uint8_t *)devStatusPtr->wBitBuf,0,sizeof(devStatusPtr->wBitBuf));
+    memset((uint8_t *)devStatusPtr->rBitBuf,0,sizeof(devStatusPtr->rBitBuf));
 
     gizCompressValue(LEGACY_BYTEOFFSET,LEGACY_BITOFFSET,LEGACY_LEN,(uint8_t *)devStatusPtr,dataPoints->valuelegacy);
+    gizCompressValue(LED1_BYTEOFFSET,LED1_BITOFFSET,LED1_LEN,(uint8_t *)devStatusPtr,dataPoints->valueLED1);
+    gizCompressValue(LED2_BYTEOFFSET,LED2_BITOFFSET,LED2_LEN,(uint8_t *)devStatusPtr,dataPoints->valueLED2);
+    gizCompressValue(LED3_BYTEOFFSET,LED3_BITOFFSET,LED3_LEN,(uint8_t *)devStatusPtr,dataPoints->valueLED3);
+    gizCompressValue(LED4_BYTEOFFSET,LED4_BITOFFSET,LED4_LEN,(uint8_t *)devStatusPtr,dataPoints->valueLED4);
+    gizCompressValue(INFRARED_BYTEOFFSET,INFRARED_BITOFFSET,INFRARED_LEN,(uint8_t *)devStatusPtr,dataPoints->valueInfrared);
     gizByteOrderExchange((uint8_t *)devStatusPtr->wBitBuf,sizeof(devStatusPtr->wBitBuf));
+    gizByteOrderExchange((uint8_t *)devStatusPtr->rBitBuf,sizeof(devStatusPtr->rBitBuf));
 
     devStatusPtr->valueMoter = gizY2X(MOTER_RATIO,  MOTER_ADDITION, dataPoints->valueMoter); 
+    devStatusPtr->valueLED_G = gizY2X(LED_G_RATIO,  LED_G_ADDITION, dataPoints->valueLED_G); 
+    devStatusPtr->valueLED_R = gizY2X(LED_R_RATIO,  LED_R_ADDITION, dataPoints->valueLED_R); 
+    devStatusPtr->valueLED_B = gizY2X(LED_B_RATIO,  LED_B_ADDITION, dataPoints->valueLED_B); 
+    devStatusPtr->valueTemperature = gizY2X(TEMPERATURE_RATIO,  TEMPERATURE_ADDITION, dataPoints->valueTemperature); 
+    devStatusPtr->valueHumidity = gizY2X(HUMIDITY_RATIO,  HUMIDITY_ADDITION, dataPoints->valueHumidity); 
 
 
 
@@ -1172,7 +1305,7 @@ static int32_t gizProtocolErrorCmd(protocolHead_t *head,errorPacketsType_t errno
 */
 static int8_t gizProtocolNTP(protocolHead_t *head)
 {
-    int32_t ret = 0;
+//    int32_t ret = 0;
     
     protocolUTT_t *UTTInfo = (protocolUTT_t *)head;
     
@@ -1522,7 +1655,7 @@ void gizwitsGetNTP(void)
 int32_t gizwitsHandle(dataPoint_t *currentData)
 {
     int8_t ret = 0;
-    uint16_t i = 0;
+//    uint16_t i = 0;
     uint8_t ackData[RB_MAX_LEN];
     uint16_t protocolLen = 0;
     uint32_t ackLen = 0;
